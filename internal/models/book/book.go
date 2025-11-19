@@ -2,7 +2,7 @@ package book
 
 import (
 	"book-manager/internal/models"
-	"book-manager/internal/models/common"
+	"book-manager/internal/models/base"
 )
 
 type Book struct {
@@ -19,5 +19,5 @@ type Book struct {
 
 	Year   string `json:"year" binding:"required"`
 	Status string `json:"status" gorm:"default:active"`
-	common.AbsTimestamp
+	base.AbsTimestamp
 }
