@@ -17,7 +17,7 @@ type Book struct {
 	// ---- Category (N-N) ----
 	Categories []models.Category `gorm:"many2many:book_categories;"`
 
-	Year   string `json:"year" binding:"required"`
-	Status string `json:"status" gorm:"default:active"`
+	Year string `json:"year" binding:"required"`
+	base.AbstractStatus
 	base.AbsTimestamp
 }
