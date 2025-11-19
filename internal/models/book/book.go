@@ -2,6 +2,7 @@ package book
 
 import (
 	"book-manager/internal/models"
+	"book-manager/internal/models/common"
 )
 
 type Book struct {
@@ -16,6 +17,7 @@ type Book struct {
 	// ---- Category (N-N) ----
 	Categories []models.Category `gorm:"many2many:book_categories;"`
 
-	Year   int    `json:"year" binding:"required"`
+	Year   string `json:"year" binding:"required"`
 	Status string `json:"status" gorm:"default:active"`
+	common.AbsTimestamp
 }

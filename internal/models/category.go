@@ -1,6 +1,10 @@
 package models
 
+import "book-manager/internal/models/common"
+
 type Category struct {
-	Id   int    `json:"id" gorm:"primaryKey"`
-	Name string `json:"name" binding:"required"`
+	Id     int    `json:"id" gorm:"primaryKey"`
+	Name   string `json:"name" binding:"required"`
+	Status string `json:"status" gorm:"default:active"`
+	common.AbsTimestamp
 }
