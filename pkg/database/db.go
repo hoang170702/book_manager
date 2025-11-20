@@ -49,7 +49,7 @@ func migrate() {
 		}
 
 		if !DB.Migrator().HasTable(m) {
-			log.Fatalf("❌ Bảng không tồn tại sau migrate: %T", m)
+			log.Fatalf("❌ Bảng không tồn tại sau migrations: %T", m)
 		}
 
 		log.Printf("✔ Migration OK: %T", m)

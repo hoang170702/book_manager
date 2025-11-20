@@ -1,12 +1,19 @@
 package relations
 
 import (
+	"book-manager/internal/models"
 	"book-manager/internal/models/base"
+	"book-manager/internal/models/book"
 )
 
 type BookCategory struct {
-	BookID     int `gorm:"primaryKey" json:"book_id"`
-	CategoryID int `gorm:"primaryKey" json:"category_id"`
+	Id         int `gorm:"primaryKey;autoIncrement" json:"id"`
+	BookID     int `json:"book_id"`
+	CategoryID int `json:"category_id"`
+
+	Book     book.Book       `gorm:"foreignKey:BookID;"`
+	Category models.Category `gorm:"foreignKey:CategoryID;"`
+
 	base.AbstractStatus
 	base.AbsTimestamp
 }
