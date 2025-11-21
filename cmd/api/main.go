@@ -12,7 +12,9 @@ import (
 
 func startServer(port string) {
 	e := echo.New()
-	routes.RegisterRoutes(e)
+
+	routes.RegisterRoutes(e, database.DB)
+
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
 }
 

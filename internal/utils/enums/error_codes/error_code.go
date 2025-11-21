@@ -12,4 +12,6 @@ var (
 	CategoryAlreadyExist = ErrorCode{"01", "Category already exist"}
 	CategoryNotFound     = ErrorCode{"02", "Category not found"}
 	CreateCategoryFailed = ErrorCode{"03", "Create category failed"}
+
+	InvalidRequest = ErrorCode{"98", "Invalid request"}
 )
