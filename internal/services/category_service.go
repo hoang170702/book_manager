@@ -6,5 +6,5 @@ import (
 )
 
 type ICategoryService interface {
-	Create(req *common.Request[category.AddCategory]) error
+	Create(req *common.Request[category.AddCategory]) common.Response[any]
 }

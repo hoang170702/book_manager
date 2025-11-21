@@ -7,6 +7,7 @@ import (
 )
 
 func BuildResponse[T any](data T, code error_codes.ErrorCode) common.Response[T] {
+
 	return common.Response[T]{
 		ResponseCode: code.Code,
 		ResponseMsg:  code.Msg,
