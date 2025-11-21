@@ -19,12 +19,12 @@ func startServer(port string) {
 }
 
 func main() {
-	cfg := config.LoadConfig()
-
 	err := godotenv.Load()
 	if err != nil {
 		return
 	}
+
+	cfg := config.LoadConfig()
 	database.Connect()
 
 	startServer(cfg.Port)
