@@ -80,7 +80,7 @@ func (c CategoryService) GetOne(req *common.Request[category.GetOneCategory]) co
 }
 
 func (c CategoryService) Create(req *common.Request[category.AddCategory]) common.Response[any] {
-	categoryReq := mapper.CategoryMapper(req.Data)
+	categoryReq := mapper.CategoryMapper(req.Data, "Anonymous")
 
 	CategoryReq := mapper.RequestMapper(req, categoryReq)
 

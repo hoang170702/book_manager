@@ -7,11 +7,11 @@ import (
 	"time"
 )
 
-func CategoryMapper(add category.AddCategory) *models.Category {
+func CategoryMapper(add category.AddCategory, user string) *models.Category {
 	ctg := &models.Category{
 		Name: add.Name,
 	}
-	ctg.CreatedBy = add.CreatedBy
+	ctg.CreatedBy = user
 	ctg.CreatedDate = time.Now()
 	ctg.Status = enums.StatusActive
 	return ctg
