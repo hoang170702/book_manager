@@ -19,4 +19,5 @@ func (r *CategoryRoutes) register(group *echo.Group) {
 
 	c.POST("/add", r.Handler.Create)
 	c.POST("/get-one", r.Handler.GetOne)
+	c.POST("/get-all", r.Handler.GetAll)
 }

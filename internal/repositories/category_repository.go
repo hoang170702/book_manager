@@ -47,3 +47,17 @@ func (r *CategoryRepository) GetOne(request *common.Request[category.GetOneCateg
 
 	return existCategory, nil
 }
+
+func (r *CategoryRepository) GetAll(request *common.Request[any]) ([]models.Category, error) {
+	var categories []models.Category
+
+	err := r.DB.Find(&categories).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, error_codes.ThrowBookStoreException(error_codes.CategoryNotFound, request.RequestId)
+		}
+		return nil, error_codes.ThrowException(err, request.RequestId)
+	}
+	return categories, nil
+}
