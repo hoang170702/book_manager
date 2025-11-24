@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"book-manager/internal/dto/category"
-	"book-manager/internal/models/common"
+	"book-manager/internal/dto/common"
 	"book-manager/internal/services"
 	"book-manager/internal/utils"
 	"book-manager/internal/utils/enums/error_codes"
@@ -27,5 +27,16 @@ func (h *CategoryHandler) Create(c echo.Context) error {
 	}
 
 	resp := h.Service.Create(&reqDto)
+	return c.JSON(200, resp)
+}
+
+func (h *CategoryHandler) GetOne(c echo.Context) error {
+	var reqDto common.Request[category.GetOneCategory]
+
+	if err := c.Bind(&reqDto); err != nil {
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest)
+		return c.JSON(400, resp)
+	}
+	resp := h.Service.GetOne(&reqDto)
 	return c.JSON(200, resp)
 }

@@ -1,8 +1,9 @@
 package repositories
 
 import (
+	"book-manager/internal/dto/category"
+	"book-manager/internal/dto/common"
 	"book-manager/internal/models"
-	"book-manager/internal/models/common"
 	"book-manager/internal/utils/enums/error_codes"
 	"errors"
 
@@ -30,4 +31,19 @@ func (r *CategoryRepository) Create(request common.Request[*models.Category]) (b
 	}
 
 	return false, error_codes.ThrowBookStoreException(error_codes.CreateCategoryFailed, request.RequestId)
+}
+
+func (r *CategoryRepository) GetOne(request *common.Request[category.GetOneCategory]) (models.Category, error) {
+	var category = request.Data
+	var existCategory models.Category
+	err := r.DB.Where("id = ?", category.Id).First(&existCategory).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return models.Category{}, error_codes.ThrowBookStoreException(error_codes.CategoryNotFound, request.RequestId)
+		}
+		return models.Category{}, error_codes.ThrowException(err, request.RequestId)
+	}
+
+	return existCategory, nil
 }

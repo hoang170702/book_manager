@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"book-manager/internal/models/common"
+	"book-manager/internal/dto/common"
 	"book-manager/internal/utils/enums/error_codes"
 	"time"
 )

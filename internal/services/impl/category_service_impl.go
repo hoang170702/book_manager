@@ -2,8 +2,9 @@ package impl
 
 import (
 	"book-manager/internal/dto/category"
+	"book-manager/internal/dto/common"
 	"book-manager/internal/mapper"
-	"book-manager/internal/models/common"
+	"book-manager/internal/models"
 	"book-manager/internal/repositories"
 	"book-manager/internal/services"
 	"book-manager/internal/utils"
@@ -12,10 +13,6 @@ import (
 
 type CategoryService struct {
 	Repo *repositories.CategoryRepository
-}
-
-func NewCategoryService(repo *repositories.CategoryRepository) services.ICategoryService {
-	return &CategoryService{Repo: repo}
 }
 
 func (c CategoryService) Create(req *common.Request[category.AddCategory]) common.Response[any] {
@@ -38,4 +35,23 @@ func (c CategoryService) Create(req *common.Request[category.AddCategory]) commo
 	}
 
 	return utils.BuildResponse[any](nil, error_codes.Success)
+}
+
+func (c CategoryService) GetOne(req *common.Request[category.GetOneCategory]) common.Response[models.Category] {
+
+	data, err := c.Repo.GetOne(req)
+
+	if err != nil {
+		appErr := err.(*error_codes.AppError)
+		return utils.BuildResponse[models.Category](models.Category{}, error_codes.ErrorCode{
+			Code: appErr.Code,
+			Msg:  appErr.Message,
+		})
+	}
+
+	return utils.BuildResponse[models.Category](data, error_codes.Success)
+}
+
+func NewCategoryService(repo *repositories.CategoryRepository) services.ICategoryService {
+	return &CategoryService{Repo: repo}
 }
