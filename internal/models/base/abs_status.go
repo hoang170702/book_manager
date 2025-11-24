@@ -22,8 +22,10 @@ func (b *AbstractStatus) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 func (b *AbstractStatus) BeforeUpdate(tx *gorm.DB) (err error) {
-	if !b.Status.IsValid() {
-		return errors.New("invalid status value")
+	if tx.Statement.Changed("Status") {
+		if !b.Status.IsValid() {
+			return errors.New("invalid status value")
+		}
 	}
 	return
 }

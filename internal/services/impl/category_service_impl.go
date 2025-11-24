@@ -15,6 +15,42 @@ type CategoryService struct {
 	Repo *repositories.CategoryRepository
 }
 
+func (c CategoryService) Delete(req *common.Request[category.DeleteCategory]) common.Response[any] {
+	ok, err := c.Repo.Delete(req, "Anonymous")
+
+	if err != nil {
+		appErr := err.(*error_codes.AppError)
+		return utils.BuildResponse[any](nil, error_codes.ErrorCode{
+			Code: appErr.Code,
+			Msg:  appErr.Message,
+		})
+	}
+
+	if !ok {
+		return utils.BuildResponse[any](nil, error_codes.BadRequest)
+	}
+
+	return utils.BuildResponse[any](nil, error_codes.Success)
+}
+
+func (c CategoryService) Update(req *common.Request[category.UpdateCategory]) common.Response[any] {
+	ok, err := c.Repo.Update(req, "Anonymous")
+
+	if err != nil {
+		appErr := err.(*error_codes.AppError)
+		return utils.BuildResponse[any](nil, error_codes.ErrorCode{
+			Code: appErr.Code,
+			Msg:  appErr.Message,
+		})
+	}
+
+	if !ok {
+		return utils.BuildResponse[any](nil, error_codes.BadRequest)
+	}
+
+	return utils.BuildResponse[any](nil, error_codes.Success)
+}
+
 func (c CategoryService) GetAll(req *common.Request[any]) common.Response[[]models.Category] {
 	data, err := c.Repo.GetAll(req)
 
