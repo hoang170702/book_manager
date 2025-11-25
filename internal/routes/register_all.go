@@ -20,7 +20,6 @@ func registerCategoryRoutes(api *echo.Group, db *gorm.DB) {
 func RegisterRoutes(e *echo.Echo, db *gorm.DB) {
 	api := e.Group("/book-store/api")
 
-	// Đăng ký các routes theo module
 	registerCategoryRoutes(api, db)
 	// registerAuthorRoutes(api, db) // TODO: Thêm khi có author routes
 	// registerBookRoutes(api, db)   // TODO: Thêm khi có book routes
