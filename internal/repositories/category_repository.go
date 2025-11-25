@@ -19,20 +19,17 @@ type CategoryRepository struct {
 func (r *CategoryRepository) Create(request common.Request[*models.Category]) (bool, error) {
 	var category = request.Data
 	var existCategory models.Category
-	err := r.DB.Where("name = ?", category.Name).First(&existCategory).Error
+	result := r.DB.Where("name = ?", category.Name).First(&existCategory)
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		if err := r.DB.Create(category).Error; err != nil {
-			return false, error_codes.ThrowException(err, request.RequestId)
-		}
-		return true, nil
+	if result.RowsAffected > 0 {
+		return false, error_codes.NewBookStoreError(error_codes.CategoryAlreadyExist, request.RequestId)
 	}
 
-	if err != nil {
+	if err := r.DB.Create(category).Error; err != nil {
 		return false, error_codes.ThrowException(err, request.RequestId)
 	}
 
-	return false, error_codes.ThrowBookStoreException(error_codes.CreateCategoryFailed, request.RequestId)
+	return true, nil
 }
 
 func (r *CategoryRepository) GetOne(request *common.Request[category.GetOneCategory]) (models.Category, error) {
@@ -66,6 +63,16 @@ func (r *CategoryRepository) GetAll(request *common.Request[any]) ([]models.Cate
 
 func (r *CategoryRepository) Update(request *common.Request[category.UpdateCategory], user string) (bool, error) {
 	data := request.Data
+	var existCategory models.Category
+
+	check := r.DB.Model(&models.Category{}).
+		Where("name = ? AND id <> ?", data.Name, data.Id).
+		First(&existCategory)
+
+	if check.RowsAffected > 0 {
+		return false, error_codes.NewBookStoreError(error_codes.CategoryAlreadyExist, request.RequestId)
+	}
+
 	update := map[string]interface{}{
 		"name":         data.Name,
 		"updated_by":   user,
