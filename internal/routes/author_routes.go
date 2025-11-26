@@ -18,4 +18,5 @@ func (r *AuthorRoutes) register(group *echo.Group) {
 	c := group.Group("/v1/authors")
 
 	c.POST("/add", r.h.Add)
+	c.POST("/get-one", r.h.GetOne)
 }

@@ -4,6 +4,7 @@ import (
 	"book-manager/internal/dto/author"
 	"book-manager/internal/dto/common"
 	"book-manager/internal/mapper"
+	"book-manager/internal/models"
 	"book-manager/internal/repositories"
 	"book-manager/internal/services"
 	"book-manager/internal/utils"
@@ -13,6 +14,22 @@ import (
 
 type AuthorService struct {
 	Repo *repositories.AuthorRepository
+}
+
+func (a AuthorService) GetOne(req *common.Request[author.GetOneAuthor]) common.Response[models.Author] {
+	data, err := a.Repo.GetOne(req)
+
+	if err != nil {
+		var appErr *error_codes.AppError
+		if errors.As(err, &appErr) {
+			return utils.BuildResponse[models.Author](models.Author{}, error_codes.ErrorCode{
+				Code: appErr.Code,
+				Msg:  appErr.Message,
+			})
+		}
+		return utils.BuildResponse[models.Author](models.Author{}, error_codes.BadRequest)
+	}
+	return utils.BuildResponse[models.Author](data, error_codes.Success)
 }
 
 func (a AuthorService) Create(req *common.Request[author.AddAuthor]) common.Response[any] {
