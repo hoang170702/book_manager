@@ -20,4 +20,5 @@ func (r *AuthorRoutes) register(group *echo.Group) {
 	c.POST("/add", r.h.Add)
 	c.POST("/get-one", r.h.GetOne)
 	c.POST("/get-all", r.h.GetAll)
+	c.POST("/update", r.h.Update)
 }

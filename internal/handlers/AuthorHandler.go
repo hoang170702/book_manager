@@ -46,3 +46,13 @@ func (h *AuthorHandler) GetAll(c echo.Context) error {
 	resp := h.Service.GetAll(&common.Request[any]{})
 	return c.JSON(200, resp)
 }
+
+func (h *AuthorHandler) Update(c echo.Context) error {
+	var reqDto common.Request[author.UpdateAuthor]
+	if err := c.Bind(&reqDto); err != nil {
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest)
+		return c.JSON(400, resp)
+	}
+	resp := h.Service.Update(&reqDto)
+	return c.JSON(200, resp)
+}

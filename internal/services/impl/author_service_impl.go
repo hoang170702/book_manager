@@ -16,6 +16,22 @@ type AuthorService struct {
 	Repo *repositories.AuthorRepository
 }
 
+func (a AuthorService) Update(req *common.Request[author.UpdateAuthor]) common.Response[any] {
+	err := a.Repo.Update(req, "Anonymous")
+
+	if err != nil {
+		var appErr *error_codes.AppError
+		if errors.As(err, &appErr) {
+			return utils.BuildResponse[any](nil, error_codes.ErrorCode{
+				Code: appErr.Code,
+				Msg:  appErr.Message,
+			})
+		}
+		return utils.BuildResponse[any](nil, error_codes.BadRequest)
+	}
+	return utils.BuildResponse[any](nil, error_codes.Success)
+}
+
 func (a AuthorService) GetAll(req *common.Request[any]) common.Response[[]models.Author] {
 	data, err := a.Repo.GetAll(req)
 	if err != nil {

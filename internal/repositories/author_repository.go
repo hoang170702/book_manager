@@ -7,6 +7,7 @@ import (
 	"book-manager/internal/utils/enums"
 	"book-manager/internal/utils/enums/error_codes"
 	"errors"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -65,4 +66,37 @@ func (r *AuthorRepository) GetAll(request *common.Request[any]) ([]models.Author
 	}
 
 	return authors, nil
+}
+
+func (r *AuthorRepository) Update(request *common.Request[author.UpdateAuthor], user string) error {
+	data := request.Data
+	var existAuthor models.Author
+
+	err := r.DB.Model(&models.Author{}).
+		Where("name = ? and  id <> ? and status <> ?", data.Name, data.Id, enums.StatusDeleted).
+		First(&existAuthor).Error
+
+	if err == nil {
+		return error_codes.NewBookStoreError(error_codes.AuthorAlreadyExist, request.RequestId)
+	}
+
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return error_codes.NewExceptionError(error_codes.BadRequest, err, request.RequestId)
+	}
+
+	update := map[string]interface{}{
+		"name":         data.Name,
+		"updated_by":   user,
+		"updated_date": time.Now(),
+	}
+
+	err = r.DB.Model(&models.Author{}).
+		Where("id = ?", data.Id).
+		Updates(update).Error
+
+	if err != nil {
+		return error_codes.NewExceptionError(error_codes.BadRequest, err, request.RequestId)
+	}
+
+	return nil
 }
