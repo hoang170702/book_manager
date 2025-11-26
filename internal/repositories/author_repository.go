@@ -4,6 +4,7 @@ import (
 	"book-manager/internal/dto/common"
 	"book-manager/internal/models"
 	"book-manager/internal/utils/enums/error_codes"
+	"errors"
 
 	"gorm.io/gorm"
 )
@@ -12,20 +13,23 @@ type AuthorRepository struct {
 	DB *gorm.DB
 }
 
-func (r *AuthorRepository) Add(request common.Request[*models.Author]) (bool, error) {
+func (r *AuthorRepository) Create(request common.Request[*models.Author]) error {
 
 	author := request.Data
 	var existAuthor models.Author
 
-	result := r.DB.Where("name = ?", author.Name).First(&existAuthor)
+	err := r.DB.Where("LOWER(name) = LOWER(?)", author.Name).First(&existAuthor).Error
 
-	if result.RowsAffected > 0 {
-		return false, error_codes.NewBookStoreError(error_codes.AuthorAlreadyExist, request.RequestId)
+	if err == nil {
+		return error_codes.NewBookStoreError(error_codes.AuthorAlreadyExist, request.RequestId)
+	}
+
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return error_codes.ThrowException(err, request.RequestId)
 	}
 
 	if err := r.DB.Create(author).Error; err != nil {
-		return false, error_codes.ThrowException(err, request.RequestId)
+		return error_codes.ThrowException(err, request.RequestId)
 	}
-
-	return true, nil
+	return nil
 }

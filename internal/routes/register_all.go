@@ -17,10 +17,18 @@ func registerCategoryRoutes(api *echo.Group, db *gorm.DB) {
 	categoryRoute.register(api)
 }
 
+func registerAuthorRoutes(api *echo.Group, db *gorm.DB) {
+	authorRepo := &repositories.AuthorRepository{DB: db}
+	categoryService := impl.NewAuthorService(authorRepo)
+	authorHandler := handlers.NewAuthorHandler(categoryService)
+	authorRoute := NewAuthorRoutes(authorHandler)
+	authorRoute.register(api)
+}
+
 func RegisterRoutes(e *echo.Echo, db *gorm.DB) {
 	api := e.Group("/book-store/api")
 
 	registerCategoryRoutes(api, db)
-	// registerAuthorRoutes(api, db) // TODO: Thêm khi có author routes
+	registerAuthorRoutes(api, db)
 	// registerBookRoutes(api, db)   // TODO: Thêm khi có book routes
 }
