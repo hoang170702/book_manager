@@ -35,7 +35,7 @@ func (r *CategoryRepository) Create(request common.Request[*models.Category]) (b
 func (r *CategoryRepository) GetOne(request *common.Request[category.GetOneCategory]) (models.Category, error) {
 	var category = request.Data
 	var existCategory models.Category
-	err := r.DB.Where("id = ?", category.Id).First(&existCategory).Error
+	err := r.DB.Where("id = ? and status <> ?", category.Id, enums.StatusDeleted).First(&existCategory).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -50,7 +50,9 @@ func (r *CategoryRepository) GetOne(request *common.Request[category.GetOneCateg
 func (r *CategoryRepository) GetAll(request *common.Request[any]) ([]models.Category, error) {
 	var categories []models.Category
 
-	err := r.DB.Find(&categories).Error
+	err := r.DB.Where("status <> ?", enums.StatusDeleted).
+		Order("created_date desc").
+		Find(&categories).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
