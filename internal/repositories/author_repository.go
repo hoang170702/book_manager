@@ -4,6 +4,7 @@ import (
 	"book-manager/internal/dto/author"
 	"book-manager/internal/dto/common"
 	"book-manager/internal/models"
+	"book-manager/internal/utils/enums"
 	"book-manager/internal/utils/enums/error_codes"
 	"errors"
 
@@ -39,7 +40,7 @@ func (r *AuthorRepository) GetOne(request *common.Request[author.GetOneAuthor]) 
 	author := request.Data
 	var existAuthor models.Author
 
-	err := r.DB.Where("id = ?", author.Id).First(&existAuthor).Error
+	err := r.DB.Where("id = ? and status <> ?", author.Id, enums.StatusDeleted).First(&existAuthor).Error
 
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -53,7 +54,8 @@ func (r *AuthorRepository) GetOne(request *common.Request[author.GetOneAuthor]) 
 func (r *AuthorRepository) GetAll(request *common.Request[any]) ([]models.Author, error) {
 	var authors []models.Author
 
-	err := r.DB.Model(&models.Author{}).Find(&authors).Error
+	err := r.DB.Where("status != ?", enums.StatusDeleted).
+		Find(&authors).Error
 
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
