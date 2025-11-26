@@ -54,9 +54,9 @@ func (r *CategoryRepository) GetAll(request *common.Request[any]) ([]models.Cate
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, error_codes.ThrowBookStoreException(error_codes.CategoryNotFound, request.RequestId)
+			return []models.Category{}, error_codes.ThrowBookStoreException(error_codes.CategoryNotFound, request.RequestId)
 		}
-		return nil, error_codes.ThrowException(err, request.RequestId)
+		return []models.Category{}, error_codes.ThrowException(err, request.RequestId)
 	}
 	return categories, nil
 }

@@ -49,3 +49,18 @@ func (r *AuthorRepository) GetOne(request *common.Request[author.GetOneAuthor]) 
 	}
 	return existAuthor, nil
 }
+
+func (r *AuthorRepository) GetAll(request *common.Request[any]) ([]models.Author, error) {
+	var authors []models.Author
+
+	err := r.DB.Model(&models.Author{}).Find(&authors).Error
+
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return []models.Author{}, error_codes.NewBookStoreError(error_codes.AuthorNotFound, request.RequestId)
+		}
+		return []models.Author{}, error_codes.ThrowException(err, request.RequestId)
+	}
+
+	return authors, nil
+}

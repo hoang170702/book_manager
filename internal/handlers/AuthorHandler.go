@@ -41,3 +41,8 @@ func (h *AuthorHandler) GetOne(c echo.Context) error {
 	resp := h.Service.GetOne(&reqDto)
 	return c.JSON(200, resp)
 }
+
+func (h *AuthorHandler) GetAll(c echo.Context) error {
+	resp := h.Service.GetAll(&common.Request[any]{})
+	return c.JSON(200, resp)
+}
