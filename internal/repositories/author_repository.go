@@ -100,3 +100,23 @@ func (r *AuthorRepository) Update(request *common.Request[author.UpdateAuthor], 
 
 	return nil
 }
+
+func (r *AuthorRepository) Delete(request *common.Request[author.DeleteAuthor], user string) error {
+	data := request.Data
+
+	deleted := map[string]interface{}{
+		"status":       enums.StatusDeleted,
+		"updated_by":   user,
+		"updated_date": time.Now(),
+	}
+
+	err := r.DB.Model(&models.Author{}).
+		Where("id = ? and status <> ?", data.Id, enums.StatusDeleted).
+		UpdateColumns(deleted).Error
+
+	if err != nil {
+		return error_codes.NewExceptionError(error_codes.BadRequest, err, request.RequestId)
+	}
+
+	return nil
+}

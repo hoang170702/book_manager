@@ -56,3 +56,13 @@ func (h *AuthorHandler) Update(c echo.Context) error {
 	resp := h.Service.Update(&reqDto)
 	return c.JSON(200, resp)
 }
+
+func (h *AuthorHandler) Delete(c echo.Context) error {
+	var reqDto common.Request[author.DeleteAuthor]
+	if err := c.Bind(&reqDto); err != nil {
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest)
+		return c.JSON(400, resp)
+	}
+	resp := h.Service.Delete(&reqDto)
+	return c.JSON(200, resp)
+}

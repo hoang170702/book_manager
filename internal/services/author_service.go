@@ -11,4 +11,5 @@ type IAuthorService interface {
 	GetOne(req *common.Request[author.GetOneAuthor]) common.Response[models.Author]
 	GetAll(req *common.Request[any]) common.Response[[]models.Author]
 	Update(req *common.Request[author.UpdateAuthor]) common.Response[any]
+	Delete(req *common.Request[author.DeleteAuthor]) common.Response[any]
 }
