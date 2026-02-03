@@ -24,11 +24,11 @@ func (a AuthorService) Delete(req *common.Request[author.DeleteAuthor]) common.R
 			return utils.BuildResponse[any](nil, error_codes.ErrorCode{
 				Code: appErr.Code,
 				Msg:  appErr.Message,
-			})
+			}, req.RequestId)
 		}
-		return utils.BuildResponse[any](nil, error_codes.BadRequest)
+		return utils.BuildResponse[any](nil, error_codes.BadRequest, req.RequestId)
 	}
-	return utils.BuildResponse[any](nil, error_codes.Success)
+	return utils.BuildResponse[any](nil, error_codes.Success, req.RequestId)
 }
 
 func (a AuthorService) Update(req *common.Request[author.UpdateAuthor]) common.Response[any] {
@@ -40,11 +40,11 @@ func (a AuthorService) Update(req *common.Request[author.UpdateAuthor]) common.R
 			return utils.BuildResponse[any](nil, error_codes.ErrorCode{
 				Code: appErr.Code,
 				Msg:  appErr.Message,
-			})
+			}, req.RequestId)
 		}
-		return utils.BuildResponse[any](nil, error_codes.BadRequest)
+		return utils.BuildResponse[any](nil, error_codes.BadRequest, req.RequestId)
 	}
-	return utils.BuildResponse[any](nil, error_codes.Success)
+	return utils.BuildResponse[any](nil, error_codes.Success, req.RequestId)
 }
 
 func (a AuthorService) GetAll(req *common.Request[any]) common.Response[[]models.Author] {
@@ -55,11 +55,11 @@ func (a AuthorService) GetAll(req *common.Request[any]) common.Response[[]models
 			return utils.BuildResponse[[]models.Author]([]models.Author{}, error_codes.ErrorCode{
 				Code: appErr.Code,
 				Msg:  appErr.Message,
-			})
+			}, req.RequestId)
 		}
-		return utils.BuildResponse[[]models.Author]([]models.Author{}, error_codes.BadRequest)
+		return utils.BuildResponse[[]models.Author]([]models.Author{}, error_codes.BadRequest, req.RequestId)
 	}
-	return utils.BuildResponse[[]models.Author](data, error_codes.Success)
+	return utils.BuildResponse[[]models.Author](data, error_codes.Success, req.RequestId)
 }
 
 func (a AuthorService) GetOne(req *common.Request[author.GetOneAuthor]) common.Response[models.Author] {
@@ -71,11 +71,11 @@ func (a AuthorService) GetOne(req *common.Request[author.GetOneAuthor]) common.R
 			return utils.BuildResponse[models.Author](models.Author{}, error_codes.ErrorCode{
 				Code: appErr.Code,
 				Msg:  appErr.Message,
-			})
+			}, req.RequestId)
 		}
-		return utils.BuildResponse[models.Author](models.Author{}, error_codes.BadRequest)
+		return utils.BuildResponse[models.Author](models.Author{}, error_codes.BadRequest, req.RequestId)
 	}
-	return utils.BuildResponse[models.Author](data, error_codes.Success)
+	return utils.BuildResponse[models.Author](data, error_codes.Success, req.RequestId)
 }
 
 func (a AuthorService) Create(req *common.Request[author.AddAuthor]) common.Response[any] {
@@ -90,12 +90,12 @@ func (a AuthorService) Create(req *common.Request[author.AddAuthor]) common.Resp
 			return utils.BuildResponse[any](nil, error_codes.ErrorCode{
 				Code: appErr.Code,
 				Msg:  appErr.Message,
-			})
+			}, req.RequestId)
 		}
 
-		return utils.BuildResponse[any](nil, error_codes.BadRequest)
+		return utils.BuildResponse[any](nil, error_codes.BadRequest, req.RequestId)
 	}
-	return utils.BuildResponse[any](nil, error_codes.Success)
+	return utils.BuildResponse[any](nil, error_codes.Success, req.RequestId)
 
 }
 

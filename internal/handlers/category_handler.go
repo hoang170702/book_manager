@@ -22,7 +22,7 @@ func (h *CategoryHandler) Create(c echo.Context) error {
 	var reqDto common.Request[category.AddCategory]
 
 	if err := c.Bind(&reqDto); err != nil {
-		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest)
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
 		return c.JSON(400, resp)
 	}
 
@@ -34,7 +34,7 @@ func (h *CategoryHandler) GetOne(c echo.Context) error {
 	var reqDto common.Request[category.GetOneCategory]
 
 	if err := c.Bind(&reqDto); err != nil {
-		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest)
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
 		return c.JSON(400, resp)
 	}
 	resp := h.Service.GetOne(&reqDto)
@@ -42,7 +42,12 @@ func (h *CategoryHandler) GetOne(c echo.Context) error {
 }
 
 func (h *CategoryHandler) GetAll(c echo.Context) error {
-	resp := h.Service.GetAll(&common.Request[any]{})
+	var reqDto common.Request[any]
+	if err := c.Bind(&reqDto); err != nil {
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
+		return c.JSON(400, resp)
+	}
+	resp := h.Service.GetAll(&reqDto)
 	return c.JSON(200, resp)
 }
 
@@ -50,7 +55,7 @@ func (h *CategoryHandler) Update(c echo.Context) error {
 	var reqDto common.Request[category.UpdateCategory]
 
 	if err := c.Bind(&reqDto); err != nil {
-		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest)
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
 		return c.JSON(400, resp)
 	}
 	resp := h.Service.Update(&reqDto)
@@ -61,7 +66,7 @@ func (h *CategoryHandler) Delete(c echo.Context) error {
 	var reqDto common.Request[category.DeleteCategory]
 
 	if err := c.Bind(&reqDto); err != nil {
-		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest)
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
 		return c.JSON(400, resp)
 	}
 	resp := h.Service.Delete(&reqDto)

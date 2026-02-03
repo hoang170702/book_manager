@@ -23,14 +23,14 @@ func (c CategoryService) Delete(req *common.Request[category.DeleteCategory]) co
 		return utils.BuildResponse[any](nil, error_codes.ErrorCode{
 			Code: appErr.Code,
 			Msg:  appErr.Message,
-		})
+		}, req.RequestId)
 	}
 
 	if !ok {
-		return utils.BuildResponse[any](nil, error_codes.BadRequest)
+		return utils.BuildResponse[any](nil, error_codes.BadRequest, req.RequestId)
 	}
 
-	return utils.BuildResponse[any](nil, error_codes.Success)
+	return utils.BuildResponse[any](nil, error_codes.Success, req.RequestId)
 }
 
 func (c CategoryService) Update(req *common.Request[category.UpdateCategory]) common.Response[any] {
@@ -41,14 +41,14 @@ func (c CategoryService) Update(req *common.Request[category.UpdateCategory]) co
 		return utils.BuildResponse[any](nil, error_codes.ErrorCode{
 			Code: appErr.Code,
 			Msg:  appErr.Message,
-		})
+		}, req.RequestId)
 	}
 
 	if !ok {
-		return utils.BuildResponse[any](nil, error_codes.BadRequest)
+		return utils.BuildResponse[any](nil, error_codes.BadRequest, req.RequestId)
 	}
 
-	return utils.BuildResponse[any](nil, error_codes.Success)
+	return utils.BuildResponse[any](nil, error_codes.Success, req.RequestId)
 }
 
 func (c CategoryService) GetAll(req *common.Request[any]) common.Response[[]models.Category] {
@@ -59,9 +59,9 @@ func (c CategoryService) GetAll(req *common.Request[any]) common.Response[[]mode
 		return utils.BuildResponse[[]models.Category](nil, error_codes.ErrorCode{
 			Code: appErr.Code,
 			Msg:  appErr.Message,
-		})
+		}, req.RequestId)
 	}
-	return utils.BuildResponse[[]models.Category](data, error_codes.Success)
+	return utils.BuildResponse[[]models.Category](data, error_codes.Success, req.RequestId)
 }
 
 func (c CategoryService) GetOne(req *common.Request[category.GetOneCategory]) common.Response[models.Category] {
@@ -73,10 +73,10 @@ func (c CategoryService) GetOne(req *common.Request[category.GetOneCategory]) co
 		return utils.BuildResponse[models.Category](models.Category{}, error_codes.ErrorCode{
 			Code: appErr.Code,
 			Msg:  appErr.Message,
-		})
+		}, req.RequestId)
 	}
 
-	return utils.BuildResponse[models.Category](data, error_codes.Success)
+	return utils.BuildResponse[models.Category](data, error_codes.Success, req.RequestId)
 }
 
 func (c CategoryService) Create(req *common.Request[category.AddCategory]) common.Response[any] {
@@ -91,14 +91,14 @@ func (c CategoryService) Create(req *common.Request[category.AddCategory]) commo
 		return utils.BuildResponse[any](nil, error_codes.ErrorCode{
 			Code: appErr.Code,
 			Msg:  appErr.Message,
-		})
+		}, req.RequestId)
 	}
 
 	if !ok {
-		return utils.BuildResponse[any](nil, error_codes.BadRequest)
+		return utils.BuildResponse[any](nil, error_codes.BadRequest, req.RequestId)
 	}
 
-	return utils.BuildResponse[any](nil, error_codes.Success)
+	return utils.BuildResponse[any](nil, error_codes.Success, req.RequestId)
 }
 
 func NewCategoryService(repo *repositories.CategoryRepository) services.ICategoryService {
