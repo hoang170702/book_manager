@@ -17,6 +17,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 func setupMiddleware(e *echo.Echo) {
@@ -26,15 +27,15 @@ func setupMiddleware(e *echo.Echo) {
 	e.Use(middleware.Logger())
 }
 
-func setupRoutes(e *echo.Echo) {
+func setupRoutes(e *echo.Echo, db *gorm.DB) {
 	// Health check (no auth required)
-	e.GET("/health", handlers.HealthCheck)
+	e.GET("/health", handlers.HealthCheck(db))
 
 	// API routes
-	routes.RegisterRoutes(e, database.DB)
+	routes.RegisterRoutes(e, db)
 }
 
-func startServer(e *echo.Echo, port string) {
+func startServer(e *echo.Echo, port string, db *gorm.DB) {
 	// Start server in goroutine
 	go func() {
 		addr := fmt.Sprintf(":%s", port)
@@ -60,7 +61,7 @@ func startServer(e *echo.Echo, port string) {
 	}
 
 	// Close database connection
-	if sqlDB, err := database.DB.DB(); err == nil {
+	if sqlDB, err := db.DB(); err == nil {
 		sqlDB.Close()
 		logger.Info("SERVER", nil, "Database connection closed")
 	}
@@ -75,13 +76,16 @@ func main() {
 	}
 
 	cfg := config.LoadConfig()
-	database.Connect()
+	db := database.Connect()
+
+	// Run migrations
+	config.RunMigrations(db)
 
 	e := echo.New()
 	e.HideBanner = true // Hide default Echo banner for cleaner logs
 
 	setupMiddleware(e)
-	setupRoutes(e)
+	setupRoutes(e, db)
 
-	startServer(e, cfg.Port)
+	startServer(e, cfg.Port, db)
 }

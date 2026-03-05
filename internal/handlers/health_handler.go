@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	"book-manager/pkg/database"
-
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 type HealthResponse struct {
@@ -12,24 +11,26 @@ type HealthResponse struct {
 }
 
 // HealthCheck returns the health status of the application
-func HealthCheck(c echo.Context) error {
-	dbStatus := "connected"
+func HealthCheck(db *gorm.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		dbStatus := "connected"
 
-	// Check database connection
-	sqlDB, err := database.DB.DB()
-	if err != nil {
-		dbStatus = "disconnected"
-	} else if err = sqlDB.Ping(); err != nil {
-		dbStatus = "disconnected"
+		// Check database connection
+		sqlDB, err := db.DB()
+		if err != nil {
+			dbStatus = "disconnected"
+		} else if err = sqlDB.Ping(); err != nil {
+			dbStatus = "disconnected"
+		}
+
+		status := "healthy"
+		if dbStatus == "disconnected" {
+			status = "unhealthy"
+		}
+
+		return c.JSON(200, HealthResponse{
+			Status:   status,
+			Database: dbStatus,
+		})
 	}
-
-	status := "healthy"
-	if dbStatus == "disconnected" {
-		status = "unhealthy"
-	}
-
-	return c.JSON(200, HealthResponse{
-		Status:   status,
-		Database: dbStatus,
-	})
 }
