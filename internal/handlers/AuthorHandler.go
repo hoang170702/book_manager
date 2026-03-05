@@ -27,6 +27,11 @@ func (h *AuthorHandler) Add(c echo.Context) error {
 		return c.JSON(constants.StatusBadRequest, resp)
 	}
 
+	if err := c.Validate(&reqDto.Data); err != nil {
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, reqDto.RequestId)
+		return c.JSON(constants.StatusBadRequest, resp)
+	}
+
 	resp := h.Service.Create(&reqDto)
 	return c.JSON(constants.StatusOK, resp)
 }
@@ -36,6 +41,11 @@ func (h *AuthorHandler) GetOne(c echo.Context) error {
 
 	if err := c.Bind(&reqDto); err != nil {
 		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
+		return c.JSON(constants.StatusBadRequest, resp)
+	}
+
+	if err := c.Validate(&reqDto.Data); err != nil {
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, reqDto.RequestId)
 		return c.JSON(constants.StatusBadRequest, resp)
 	}
 
@@ -59,6 +69,12 @@ func (h *AuthorHandler) Update(c echo.Context) error {
 		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
 		return c.JSON(constants.StatusBadRequest, resp)
 	}
+
+	if err := c.Validate(&reqDto.Data); err != nil {
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, reqDto.RequestId)
+		return c.JSON(constants.StatusBadRequest, resp)
+	}
+
 	resp := h.Service.Update(&reqDto)
 	return c.JSON(constants.StatusOK, resp)
 }
@@ -69,6 +85,12 @@ func (h *AuthorHandler) Delete(c echo.Context) error {
 		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
 		return c.JSON(constants.StatusBadRequest, resp)
 	}
+
+	if err := c.Validate(&reqDto.Data); err != nil {
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, reqDto.RequestId)
+		return c.JSON(constants.StatusBadRequest, resp)
+	}
+
 	resp := h.Service.Delete(&reqDto)
 	return c.JSON(constants.StatusOK, resp)
 }

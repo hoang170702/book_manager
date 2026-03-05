@@ -13,7 +13,7 @@ import (
 )
 
 type AuthorService struct {
-	Repo *repositories.AuthorRepository
+	Repo repositories.IAuthorRepository
 }
 
 func (a AuthorService) Delete(req *common.Request[author.DeleteAuthor]) common.Response[any] {
@@ -99,6 +99,6 @@ func (a AuthorService) Create(req *common.Request[author.AddAuthor]) common.Resp
 
 }
 
-func NewAuthorService(repo *repositories.AuthorRepository) services.IAuthorService {
+func NewAuthorService(repo repositories.IAuthorRepository) services.IAuthorService {
 	return &AuthorService{Repo: repo}
 }

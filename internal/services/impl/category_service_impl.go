@@ -12,7 +12,7 @@ import (
 )
 
 type CategoryService struct {
-	Repo *repositories.CategoryRepository
+	Repo repositories.ICategoryRepository
 }
 
 func (c CategoryService) Delete(req *common.Request[category.DeleteCategory]) common.Response[any] {
@@ -101,6 +101,6 @@ func (c CategoryService) Create(req *common.Request[category.AddCategory]) commo
 	return utils.BuildResponse[any](nil, error_codes.Success, req.RequestId)
 }
 
-func NewCategoryService(repo *repositories.CategoryRepository) services.ICategoryService {
+func NewCategoryService(repo repositories.ICategoryRepository) services.ICategoryService {
 	return &CategoryService{Repo: repo}
 }

@@ -84,6 +84,7 @@ func main() {
 	e := echo.New()
 	e.HideBanner = true // Hide default Echo banner for cleaner logs
 
+	middleware.RegisterValidator(e)
 	setupMiddleware(e)
 	setupRoutes(e, db)
 

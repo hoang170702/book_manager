@@ -27,6 +27,11 @@ func (h *CategoryHandler) Create(c echo.Context) error {
 		return c.JSON(constants.StatusBadRequest, resp)
 	}
 
+	if err := c.Validate(&reqDto.Data); err != nil {
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, reqDto.RequestId)
+		return c.JSON(constants.StatusBadRequest, resp)
+	}
+
 	resp := h.Service.Create(&reqDto)
 	return c.JSON(constants.StatusOK, resp)
 }
@@ -38,6 +43,12 @@ func (h *CategoryHandler) GetOne(c echo.Context) error {
 		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
 		return c.JSON(constants.StatusBadRequest, resp)
 	}
+
+	if err := c.Validate(&reqDto.Data); err != nil {
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, reqDto.RequestId)
+		return c.JSON(constants.StatusBadRequest, resp)
+	}
+
 	resp := h.Service.GetOne(&reqDto)
 	return c.JSON(constants.StatusOK, resp)
 }
@@ -59,6 +70,12 @@ func (h *CategoryHandler) Update(c echo.Context) error {
 		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
 		return c.JSON(constants.StatusBadRequest, resp)
 	}
+
+	if err := c.Validate(&reqDto.Data); err != nil {
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, reqDto.RequestId)
+		return c.JSON(constants.StatusBadRequest, resp)
+	}
+
 	resp := h.Service.Update(&reqDto)
 	return c.JSON(constants.StatusOK, resp)
 }
@@ -70,6 +87,12 @@ func (h *CategoryHandler) Delete(c echo.Context) error {
 		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
 		return c.JSON(constants.StatusBadRequest, resp)
 	}
+
+	if err := c.Validate(&reqDto.Data); err != nil {
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, reqDto.RequestId)
+		return c.JSON(constants.StatusBadRequest, resp)
+	}
+
 	resp := h.Service.Delete(&reqDto)
 	return c.JSON(constants.StatusOK, resp)
 }
