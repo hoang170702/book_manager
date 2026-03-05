@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"book-manager/internal/constants"
 	"book-manager/internal/dto/common"
 	"book-manager/internal/utils/logger"
 	"fmt"
@@ -29,7 +30,7 @@ func Recovery() echo.MiddlewareFunc {
 						ResponseMsg:  "Internal server error",
 						Data:         nil,
 					}
-					c.JSON(500, resp)
+					c.JSON(constants.StatusInternalServerError, resp)
 				}
 			}()
 

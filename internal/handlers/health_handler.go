@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"book-manager/internal/constants"
+
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
@@ -28,7 +30,7 @@ func HealthCheck(db *gorm.DB) echo.HandlerFunc {
 			status = "unhealthy"
 		}
 
-		return c.JSON(200, HealthResponse{
+		return c.JSON(constants.StatusOK, HealthResponse{
 			Status:   status,
 			Database: dbStatus,
 		})

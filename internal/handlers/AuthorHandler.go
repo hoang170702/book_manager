@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"book-manager/internal/constants"
 	"book-manager/internal/dto/author"
 	"book-manager/internal/dto/common"
 	"book-manager/internal/services"
@@ -23,11 +24,11 @@ func (h *AuthorHandler) Add(c echo.Context) error {
 
 	if err := c.Bind(&reqDto); err != nil {
 		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
-		return c.JSON(400, resp)
+		return c.JSON(constants.StatusBadRequest, resp)
 	}
 
 	resp := h.Service.Create(&reqDto)
-	return c.JSON(200, resp)
+	return c.JSON(constants.StatusOK, resp)
 }
 
 func (h *AuthorHandler) GetOne(c echo.Context) error {
@@ -35,39 +36,39 @@ func (h *AuthorHandler) GetOne(c echo.Context) error {
 
 	if err := c.Bind(&reqDto); err != nil {
 		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
-		return c.JSON(400, resp)
+		return c.JSON(constants.StatusBadRequest, resp)
 	}
 
 	resp := h.Service.GetOne(&reqDto)
-	return c.JSON(200, resp)
+	return c.JSON(constants.StatusOK, resp)
 }
 
 func (h *AuthorHandler) GetAll(c echo.Context) error {
 	var reqDto common.Request[any]
 	if err := c.Bind(&reqDto); err != nil {
 		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
-		return c.JSON(400, resp)
+		return c.JSON(constants.StatusBadRequest, resp)
 	}
 	resp := h.Service.GetAll(&reqDto)
-	return c.JSON(200, resp)
+	return c.JSON(constants.StatusOK, resp)
 }
 
 func (h *AuthorHandler) Update(c echo.Context) error {
 	var reqDto common.Request[author.UpdateAuthor]
 	if err := c.Bind(&reqDto); err != nil {
 		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
-		return c.JSON(400, resp)
+		return c.JSON(constants.StatusBadRequest, resp)
 	}
 	resp := h.Service.Update(&reqDto)
-	return c.JSON(200, resp)
+	return c.JSON(constants.StatusOK, resp)
 }
 
 func (h *AuthorHandler) Delete(c echo.Context) error {
 	var reqDto common.Request[author.DeleteAuthor]
 	if err := c.Bind(&reqDto); err != nil {
 		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
-		return c.JSON(400, resp)
+		return c.JSON(constants.StatusBadRequest, resp)
 	}
 	resp := h.Service.Delete(&reqDto)
-	return c.JSON(200, resp)
+	return c.JSON(constants.StatusOK, resp)
 }
