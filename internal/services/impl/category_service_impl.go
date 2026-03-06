@@ -4,7 +4,6 @@ import (
 	"book-manager/internal/dto/category"
 	"book-manager/internal/dto/common"
 	"book-manager/internal/mapper"
-	"book-manager/internal/models"
 	"book-manager/internal/repositories"
 	"book-manager/internal/services"
 	"book-manager/internal/utils"
@@ -58,38 +57,54 @@ func (c CategoryService) Update(req *common.Request[category.UpdateCategory]) co
 	return utils.BuildResponse[any](nil, error_codes.Success, req.RequestId)
 }
 
-func (c CategoryService) GetAll(req *common.Request[any]) common.Response[[]models.Category] {
+func (c CategoryService) GetAll(req *common.Request[any]) common.Response[[]category.CategoryResponse] {
 	data, err := c.Repo.GetAll(req)
 
 	if err != nil {
 		var appErr *error_codes.AppError
 		if errors.As(err, &appErr) {
-			return utils.BuildResponse[[]models.Category](nil, error_codes.ErrorCode{
+			return utils.BuildResponse[[]category.CategoryResponse](nil, error_codes.ErrorCode{
 				Code: appErr.Code,
 				Msg:  appErr.Message,
 			}, req.RequestId)
 		}
-		return utils.BuildResponse[[]models.Category](nil, error_codes.BadRequest, req.RequestId)
+		return utils.BuildResponse[[]category.CategoryResponse](nil, error_codes.BadRequest, req.RequestId)
 	}
-	return utils.BuildResponse[[]models.Category](data, error_codes.Success, req.RequestId)
+
+	// Map entities to response DTOs
+	var result []category.CategoryResponse
+	for _, item := range data {
+		result = append(result, category.CategoryResponse{
+			Id:   item.Id,
+			Name: item.Name,
+		})
+	}
+
+	return utils.BuildResponse[[]category.CategoryResponse](result, error_codes.Success, req.RequestId)
 }
 
-func (c CategoryService) GetOne(req *common.Request[category.GetOneCategory]) common.Response[models.Category] {
+func (c CategoryService) GetOne(req *common.Request[category.GetOneCategory]) common.Response[category.CategoryResponse] {
 
 	data, err := c.Repo.GetOne(req)
 
 	if err != nil {
 		var appErr *error_codes.AppError
 		if errors.As(err, &appErr) {
-			return utils.BuildResponse[models.Category](models.Category{}, error_codes.ErrorCode{
+			return utils.BuildResponse[category.CategoryResponse](category.CategoryResponse{}, error_codes.ErrorCode{
 				Code: appErr.Code,
 				Msg:  appErr.Message,
 			}, req.RequestId)
 		}
-		return utils.BuildResponse[models.Category](models.Category{}, error_codes.BadRequest, req.RequestId)
+		return utils.BuildResponse[category.CategoryResponse](category.CategoryResponse{}, error_codes.BadRequest, req.RequestId)
 	}
 
-	return utils.BuildResponse[models.Category](data, error_codes.Success, req.RequestId)
+	// Map entity to response DTO
+	result := category.CategoryResponse{
+		Id:   data.Id,
+		Name: data.Name,
+	}
+
+	return utils.BuildResponse[category.CategoryResponse](result, error_codes.Success, req.RequestId)
 }
 
 func (c CategoryService) Create(req *common.Request[category.AddCategory]) common.Response[any] {

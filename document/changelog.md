@@ -62,3 +62,16 @@
 
 **Đã sửa:**
 - `internal/services/impl/category_service_impl.go` — Đổi tất cả 5 chỗ type assertion thành `errors.As(err, &appErr)` + fallback `BadRequest` cho unexpected errors. Giờ thống nhất với `author_service_impl.go`.
+
+### Fix #5: DTO Improvements ✅
+**Vấn đề:** Service trả `models.Category`/`models.Author` trực tiếp → expose DB fields (status, created_by...). `Request` import `models.Paginate` → DTO phụ thuộc Model.
+
+**Đã sửa:**
+- `dto/common/paginate.go` — **[NEW]** Copy Paginate từ models vào dto layer.
+- `dto/common/request.go` — Dùng `common.Paginate` thay `models.Paginate`, xóa import models.
+- `dto/category/category_response.go` — **[NEW]** Response DTO chỉ expose `id`, `name`.
+- `dto/author/author_response.go` — **[NEW]** Response DTO chỉ expose `id`, `name`.
+- `services/category_service.go` — `GetOne`/`GetAll` return `CategoryResponse` thay `models.Category`.
+- `services/author_service.go` — Tương tự cho `AuthorResponse`.
+- `services/impl/category_service_impl.go` — Map entity → response DTO.
+- `services/impl/author_service_impl.go` — Tương tự.

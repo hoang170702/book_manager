@@ -24,7 +24,7 @@ func (r *AuthorRepository) dbCtx(requestId string) *gorm.DB {
 	return r.DB.WithContext(ctx)
 }
 
-func (r *AuthorRepository) Create(request common.Request[*models.Author]) error {
+func (r *AuthorRepository) Create(request common.Request[*models.Author]) (bool, error) {
 	db := r.dbCtx(request.RequestId)
 
 	author := request.Data
@@ -33,17 +33,17 @@ func (r *AuthorRepository) Create(request common.Request[*models.Author]) error 
 	err := db.Where("LOWER(name) = LOWER(?)", author.Name).First(&existAuthor).Error
 
 	if err == nil {
-		return error_codes.NewBookStoreError(error_codes.AuthorAlreadyExist, request.RequestId)
+		return false, error_codes.NewBookStoreError(error_codes.AuthorAlreadyExist, request.RequestId)
 	}
 
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return error_codes.ThrowException(err, request.RequestId)
+		return false, error_codes.ThrowException(err, request.RequestId)
 	}
 
 	if err := db.Create(author).Error; err != nil {
-		return error_codes.ThrowException(err, request.RequestId)
+		return false, error_codes.ThrowException(err, request.RequestId)
 	}
-	return nil
+	return true, nil
 }
 
 func (r *AuthorRepository) GetOne(request *common.Request[author.GetOneAuthor]) (models.Author, error) {
@@ -54,8 +54,8 @@ func (r *AuthorRepository) GetOne(request *common.Request[author.GetOneAuthor]) 
 	err := db.Where("id = ? and status <> ?", author.Id, enums.StatusDeleted).First(&existAuthor).Error
 
 	if err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return models.Author{}, error_codes.NewBookStoreError(error_codes.AuthorNotFound, request.RequestId)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return models.Author{}, error_codes.ThrowBookStoreException(error_codes.AuthorNotFound, request.RequestId)
 		}
 		return models.Author{}, error_codes.ThrowException(err, request.RequestId)
 	}
@@ -70,8 +70,8 @@ func (r *AuthorRepository) GetAll(request *common.Request[any]) ([]models.Author
 		Find(&authors).Error
 
 	if err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return []models.Author{}, error_codes.NewBookStoreError(error_codes.AuthorNotFound, request.RequestId)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return []models.Author{}, error_codes.ThrowBookStoreException(error_codes.AuthorNotFound, request.RequestId)
 		}
 		return []models.Author{}, error_codes.ThrowException(err, request.RequestId)
 	}
@@ -79,21 +79,17 @@ func (r *AuthorRepository) GetAll(request *common.Request[any]) ([]models.Author
 	return authors, nil
 }
 
-func (r *AuthorRepository) Update(request *common.Request[author.UpdateAuthor], user string) error {
+func (r *AuthorRepository) Update(request *common.Request[author.UpdateAuthor], user string) (bool, error) {
 	db := r.dbCtx(request.RequestId)
 	data := request.Data
 	var existAuthor models.Author
 
-	err := db.Model(&models.Author{}).
-		Where("name = ? and  id <> ? and status <> ?", data.Name, data.Id, enums.StatusDeleted).
-		First(&existAuthor).Error
+	check := db.Model(&models.Author{}).
+		Where("name = ? AND id <> ? AND status <> ?", data.Name, data.Id, enums.StatusDeleted).
+		First(&existAuthor)
 
-	if err == nil {
-		return error_codes.NewBookStoreError(error_codes.AuthorAlreadyExist, request.RequestId)
-	}
-
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return error_codes.NewExceptionError(error_codes.BadRequest, err, request.RequestId)
+	if check.RowsAffected > 0 {
+		return false, error_codes.NewBookStoreError(error_codes.AuthorAlreadyExist, request.RequestId)
 	}
 
 	update := map[string]interface{}{
@@ -102,18 +98,22 @@ func (r *AuthorRepository) Update(request *common.Request[author.UpdateAuthor], 
 		"updated_date": time.Now(),
 	}
 
-	err = db.Model(&models.Author{}).
+	result := db.Model(&models.Author{}).
 		Where("id = ?", data.Id).
-		Updates(update).Error
+		Updates(update)
 
-	if err != nil {
-		return error_codes.NewExceptionError(error_codes.BadRequest, err, request.RequestId)
+	if result.Error != nil {
+		return false, error_codes.ThrowException(result.Error, request.RequestId)
 	}
 
-	return nil
+	if result.RowsAffected == 0 {
+		return false, error_codes.ThrowBookStoreException(error_codes.AuthorNotFound, request.RequestId)
+	}
+
+	return true, nil
 }
 
-func (r *AuthorRepository) Delete(request *common.Request[author.DeleteAuthor], user string) error {
+func (r *AuthorRepository) Delete(request *common.Request[author.DeleteAuthor], user string) (bool, error) {
 	db := r.dbCtx(request.RequestId)
 	data := request.Data
 
@@ -123,13 +123,17 @@ func (r *AuthorRepository) Delete(request *common.Request[author.DeleteAuthor], 
 		"updated_date": time.Now(),
 	}
 
-	err := db.Model(&models.Author{}).
-		Where("id = ? and status <> ?", data.Id, enums.StatusDeleted).
-		UpdateColumns(deleted).Error
+	result := db.Model(&models.Author{}).
+		Where("id = ? AND status <> ?", data.Id, enums.StatusDeleted).
+		UpdateColumns(deleted)
 
-	if err != nil {
-		return error_codes.NewExceptionError(error_codes.BadRequest, err, request.RequestId)
+	if result.Error != nil {
+		return false, error_codes.ThrowException(result.Error, request.RequestId)
 	}
 
-	return nil
+	if result.RowsAffected == 0 {
+		return false, error_codes.ThrowBookStoreException(error_codes.AuthorNotFound, request.RequestId)
+	}
+
+	return true, nil
 }

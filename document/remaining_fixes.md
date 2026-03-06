@@ -127,7 +127,7 @@ if err != nil {
 
 ---
 
-## Fix #5: DTO Improvements 🟡 CHƯA FIX
+## Fix #5: DTO Improvements ✅ ĐÃ FIX
 
 ### Vấn đề gì?
 

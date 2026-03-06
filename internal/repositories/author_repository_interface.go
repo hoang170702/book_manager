@@ -7,9 +7,9 @@ import (
 )
 
 type IAuthorRepository interface {
-	Create(request common.Request[*models.Author]) error
+	Create(request common.Request[*models.Author]) (bool, error)
 	GetOne(request *common.Request[author.GetOneAuthor]) (models.Author, error)
 	GetAll(request *common.Request[any]) ([]models.Author, error)
-	Update(request *common.Request[author.UpdateAuthor], user string) error
-	Delete(request *common.Request[author.DeleteAuthor], user string) error
+	Update(request *common.Request[author.UpdateAuthor], user string) (bool, error)
+	Delete(request *common.Request[author.DeleteAuthor], user string) (bool, error)
 }

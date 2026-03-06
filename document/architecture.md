@@ -3,6 +3,7 @@
 ## Tech Stack
 - **Go 1.24** + **Echo v4** (HTTP framework)
 - **GORM** + **PostgreSQL** (ORM + Database)
+- **go-playground/validator/v10** (DTO validation)
 - **UUID** (request tracing)
 - **godotenv** (.env configuration)
 
@@ -10,18 +11,19 @@
 ```
 book-manager/
 ├── cmd/api/main.go              ← Entry point, DI wiring, graceful shutdown
+├── document/                    ← Changelog, architecture, fixes plan
 ├── internal/
 │   ├── config/                   ← App config + DB migration
 │   ├── constants/                ← HTTP status constants
-│   ├── dto/                      ← Data Transfer Objects
+│   ├── dto/                      ← Data Transfer Objects (độc lập với models)
 │   │   ├── auth/                 ← (reserved for auth DTOs)
-│   │   ├── author/               ← Author request DTOs
-│   │   ├── category/             ← Category request DTOs
-│   │   └── common/               ← Generic Request[T] / Response[T]
+│   │   ├── author/               ← Author request + response DTOs
+│   │   ├── category/             ← Category request + response DTOs
+│   │   └── common/               ← Generic Request[T], Response[T], Paginate
 │   ├── handlers/                 ← HTTP handlers (Controller layer)
 │   ├── mapper/                   ← DTO → Entity mapping
-│   ├── middleware/               ← Recovery, RequestID, Logging (req/res body)
-│   ├── models/                   ← GORM entities
+│   ├── middleware/               ← Recovery, RequestID, Logger, Validator
+│   ├── models/                   ← GORM entities (internal, không expose ra API)
 │   │   ├── base/                 ← AbstractStatus, AbsTimestamp (embedded)
 │   │   ├── book/                 ← Book entity
 │   │   ├── relations/            ← N-N join tables
@@ -44,11 +46,20 @@ Handler (HTTP) → Service (Business Logic) → Repository (Data Access) → GOR
 - **Service** depends on `repositories.IXxxRepository` (interface)
 - **Repository** depends on `*gorm.DB` (injected)
 
+## Data Flow
+```
+Request JSON → Handler (Bind + Validate) → Service → Repository → DB
+DB → Repository (models.Entity) → Service (map → ResponseDTO) → Handler → Response JSON
+```
+- **Request**: Client gửi JSON → Bind vào `Request[T]` → Validate `reqDto.Data`
+- **Response**: Repository trả `models.Entity` → Service map sang `XxxResponse` DTO → client chỉ thấy `id`, `name`
+
 ## Dependency Injection Flow
 ```go
 main.go
   └─ db := database.Connect()
   └─ config.RunMigrations(db)
+  └─ middleware.RegisterValidator(e)
   └─ routes.RegisterRoutes(e, db)
        └─ repo := &repositories.XxxRepository{DB: db}
        └─ service := impl.NewXxxService(repo)
@@ -58,9 +69,12 @@ main.go
 
 ## Key Design Patterns
 - **Generic DTO**: `Request[T]` / `Response[T]` — enterprise pattern giống `ApiResponse<T>` trong Java
-- **Interface-based DI**: Service → Repository đều qua interface
+- **Response DTO Mapping**: Service map entity → response DTO, không expose DB fields ra API
+- **Interface-based DI**: Service → Repository đều qua interface, dễ mock test
+- **DTO Validation**: `go-playground/validator` tích hợp Echo, validate `reqDto.Data` sau Bind
+- **Safe Error Handling**: Luôn dùng `errors.As()` thay vì type assertion, có fallback cho unexpected errors
+- **Custom GORM Logger**: Chỉ log slow query >200ms, kèm Request ID cho traceability
+- **HTTP Logging**: Log request/response body, ưu tiên body `request_id` thay UUID
 - **Soft Delete**: Update `status = "deleted"` thay vì xóa thật
 - **Base model embedded**: `AbstractStatus` + `AbsTimestamp` cho tất cả entities
-- **Custom GORM Logger**: Chỉ log slow query >200ms, kèm Request ID cho traceability
-- **DTO Validation**: `go-playground/validator` tích hợp Echo, validate `reqDto.Data` sau Bind
 - **Graceful Shutdown**: Signal handling + context timeout
