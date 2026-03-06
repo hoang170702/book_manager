@@ -46,3 +46,19 @@
 - `internal/repositories/author_repository_interface.go` — **[NEW]** `IAuthorRepository` interface.
 - `internal/services/impl/category_service_impl.go` — `Repo` field đổi sang `repositories.ICategoryRepository`.
 - `internal/services/impl/author_service_impl.go` — `Repo` field đổi sang `repositories.IAuthorRepository`.
+
+### Fix #3: Validation Middleware ✅
+**Vấn đề:** DTO có `validate:"required"` tag nhưng không có validator nào được gọi. `c.Bind()` chỉ unmarshal JSON, **không validate**.
+
+**Đã sửa:**
+- `go.mod` — Thêm dependency `github.com/go-playground/validator/v10`
+- `internal/middleware/validator.go` — **[NEW]** Custom validator wraps `go-playground/validator` cho Echo.
+- `cmd/api/main.go` — Gọi `middleware.RegisterValidator(e)` trước khi setup routes.
+- `internal/handlers/category_handler.go` — Thêm `c.Validate(&reqDto.Data)` sau `c.Bind()` ở Create, GetOne, Update, Delete.
+- `internal/handlers/AuthorHandler.go` — Tương tự cho tất cả methods.
+
+### Fix #4: Error Handling Consistency ✅
+**Vấn đề:** `category_service_impl.go` dùng `err.(*AppError)` (type assertion) → panic nếu error khác type.
+
+**Đã sửa:**
+- `internal/services/impl/category_service_impl.go` — Đổi tất cả 5 chỗ type assertion thành `errors.As(err, &appErr)` + fallback `BadRequest` cho unexpected errors. Giờ thống nhất với `author_service_impl.go`.

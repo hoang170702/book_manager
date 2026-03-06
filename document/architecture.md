@@ -62,4 +62,5 @@ main.go
 - **Soft Delete**: Update `status = "deleted"` thay vì xóa thật
 - **Base model embedded**: `AbstractStatus` + `AbsTimestamp` cho tất cả entities
 - **Custom GORM Logger**: Chỉ log slow query >200ms, kèm Request ID cho traceability
+- **DTO Validation**: `go-playground/validator` tích hợp Echo, validate `reqDto.Data` sau Bind
 - **Graceful Shutdown**: Signal handling + context timeout
