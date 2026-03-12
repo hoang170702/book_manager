@@ -160,7 +160,7 @@ type Request[T any] struct {
 
 ---
 
-## Fix #6: CORS Middleware 🟡 CHƯA FIX
+## Fix #6: CORS Middleware ✅ ĐÃ FIX
 
 ### Vấn đề gì?
 
@@ -179,7 +179,7 @@ Thêm Echo built-in CORS middleware vào `main.go`. 2-3 dòng code.
 
 ---
 
-## Fix #7: File Naming Consistency 🟢 CHƯA FIX
+## Fix #7: File Naming Consistency ✅ ĐÃ FIX
 
 ### Vấn đề gì?
 
@@ -201,7 +201,7 @@ Rename `AuthorHandler.go` → `author_handler.go`
 
 ---
 
-## Fix #8: Hardcoded "Anonymous" User 🟢 CHƯA FIX
+## Fix #8: Hardcoded "Anonymous" User ✅ ĐÃ FIX
 
 ### Vấn đề gì?
 
@@ -222,7 +222,7 @@ Tạo helper `GetCurrentUser(c echo.Context) string` → mặc định trả `"A
 
 ---
 
-## Fix #9: Clean Up Empty Packages 🟢 CHƯA FIX
+## Fix #9: Clean Up Empty Packages ✅ ĐÃ FIX
 
 ### Vấn đề gì?
 

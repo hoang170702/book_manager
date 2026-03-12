@@ -75,3 +75,29 @@
 - `services/author_service.go` — Tương tự cho `AuthorResponse`.
 - `services/impl/category_service_impl.go` — Map entity → response DTO.
 - `services/impl/author_service_impl.go` — Tương tự.
+
+### Fix #6: CORS Middleware ✅
+**Vấn đề:** Không có CORS middleware → browser từ domain khác gọi API bị block.
+
+**Đã sửa:**
+- `cmd/api/main.go` — Thêm `echomw.CORSWithConfig()` vào `setupMiddleware()`. Cho phép `AllowOrigins: *`, các method GET/POST/PUT/DELETE/OPTIONS, và headers Origin/Content-Type/Accept/Authorization. CORS đặt đầu tiên để xử lý preflight OPTIONS trước các middleware khác.
+
+### Fix #7: File Naming Consistency ✅
+**Vấn đề:** File `AuthorHandler.go` viết hoa PascalCase không đúng chuẩn Go.
+
+**Đã sửa:**
+- Đổi tên file `internal/handlers/AuthorHandler.go` thành `internal/handlers/author_handler.go` để đồng bộ chuẩn snake_case.
+
+### Fix #8: Hardcoded "Anonymous" User ✅
+**Vấn đề:** Hardcode `"Anonymous"` ở 10+ chỗ khi gọi Repository `Create/Update/Delete`.
+
+**Đã sửa:**
+- `internal/utils/auth/user.go` — **[NEW]** Tạo helper `GetCurrentUser(c echo.Context) string` trả về user (hiện tại tạm gán "Anonymous", sau này lấy từ JWT).
+- `internal/handlers/author_handler.go`, `category_handler.go` — Đọc user từ context và truyền xuống Service layer.
+- Thay đổi `Create/Update/Delete` trong `Service` interface và implementation để nhận parameter `user string` thay vì hardcode. Dữ liệu này được truyền trọn vẹn xuống Repository.
+
+### Fix #9: Clean Up Empty Packages ✅
+**Vấn đề:** Các file `dto/auth/login.go`, `models/user/role.go`, `models/user/user.go` chỉ chứa duy nhất dòng khai báo `package` gây khó hiểu, không rõ là đã xóa logic hay chưa implement.
+
+**Đã sửa:**
+- Thêm comment kiểu `// TODO: Implement...` vào trong 3 file rỗng đó để đánh dấu rõ ràng đây là các file chờ được implement logic sau này thay vì xóa đi cấu trúc thư mục.

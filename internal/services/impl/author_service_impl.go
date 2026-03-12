@@ -15,8 +15,8 @@ type AuthorService struct {
 	Repo repositories.IAuthorRepository
 }
 
-func (a AuthorService) Delete(req *common.Request[author.DeleteAuthor]) common.Response[any] {
-	ok, err := a.Repo.Delete(req, "Anonymous")
+func (a AuthorService) Delete(req *common.Request[author.DeleteAuthor], user string) common.Response[any] {
+	ok, err := a.Repo.Delete(req, user)
 
 	if err != nil {
 		var appErr *error_codes.AppError
@@ -36,8 +36,8 @@ func (a AuthorService) Delete(req *common.Request[author.DeleteAuthor]) common.R
 	return utils.BuildResponse[any](nil, error_codes.Success, req.RequestId)
 }
 
-func (a AuthorService) Update(req *common.Request[author.UpdateAuthor]) common.Response[any] {
-	ok, err := a.Repo.Update(req, "Anonymous")
+func (a AuthorService) Update(req *common.Request[author.UpdateAuthor], user string) common.Response[any] {
+	ok, err := a.Repo.Update(req, user)
 
 	if err != nil {
 		var appErr *error_codes.AppError
@@ -107,8 +107,8 @@ func (a AuthorService) GetOne(req *common.Request[author.GetOneAuthor]) common.R
 	return utils.BuildResponse[author.AuthorResponse](result, error_codes.Success, req.RequestId)
 }
 
-func (a AuthorService) Create(req *common.Request[author.AddAuthor]) common.Response[any] {
-	authorEntity := mapper.AuthorMapper(req.Data, "Anonymous")
+func (a AuthorService) Create(req *common.Request[author.AddAuthor], user string) common.Response[any] {
+	authorEntity := mapper.AuthorMapper(req.Data, user)
 
 	request := mapper.RequestMapper(req, authorEntity)
 

@@ -21,18 +21,18 @@ type MockService struct{}
 func (m *MockService) Create(req *common.Request[category.AddCategory]) common.Response[any] {
 	return common.Response[any]{}
 }
-func (m *MockService) GetOne(req *common.Request[category.GetOneCategory]) common.Response[models.Category] {
-	return common.Response[models.Category]{}
+func (m *MockService) GetOne(req *common.Request[category.GetOneCategory]) common.Response[category.CategoryResponse] {
+	return common.Response[category.CategoryResponse]{}
 }
-func (m *MockService) GetAll(req *common.Request[any]) common.Response[[]models.Category] {
+func (m *MockService) GetAll(req *common.Request[any]) common.Response[[]category.CategoryResponse] {
 	// Verify RequestId is passed to service (optional, but good)
 	if req.RequestId != "test-req-id-123" {
 		fmt.Printf("FAIL: Service received wrong RequestId: %s\n", req.RequestId)
 	}
-	return common.Response[[]models.Category]{
+	return common.Response[[]category.CategoryResponse]{
 		ResponseCode: "00",
 		ResponseMsg:  "Success",
-		Data:         []models.Category{},
+		Data:         []category.CategoryResponse{},
 	}
 }
 func (m *MockService) Update(req *common.Request[category.UpdateCategory]) common.Response[any] {
@@ -64,7 +64,7 @@ func main() {
 		return
 	}
 
-	var resp common.Response[[]models.Category]
+	var resp common.Response[[]category.CategoryResponse]
 	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
 		return
 	}

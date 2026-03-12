@@ -15,8 +15,8 @@ type CategoryService struct {
 	Repo repositories.ICategoryRepository
 }
 
-func (c CategoryService) Delete(req *common.Request[category.DeleteCategory]) common.Response[any] {
-	ok, err := c.Repo.Delete(req, "Anonymous")
+func (c CategoryService) Delete(req *common.Request[category.DeleteCategory], user string) common.Response[any] {
+	ok, err := c.Repo.Delete(req, user)
 
 	if err != nil {
 		var appErr *error_codes.AppError
@@ -36,8 +36,8 @@ func (c CategoryService) Delete(req *common.Request[category.DeleteCategory]) co
 	return utils.BuildResponse[any](nil, error_codes.Success, req.RequestId)
 }
 
-func (c CategoryService) Update(req *common.Request[category.UpdateCategory]) common.Response[any] {
-	ok, err := c.Repo.Update(req, "Anonymous")
+func (c CategoryService) Update(req *common.Request[category.UpdateCategory], user string) common.Response[any] {
+	ok, err := c.Repo.Update(req, user)
 
 	if err != nil {
 		var appErr *error_codes.AppError
@@ -107,8 +107,8 @@ func (c CategoryService) GetOne(req *common.Request[category.GetOneCategory]) co
 	return utils.BuildResponse[category.CategoryResponse](result, error_codes.Success, req.RequestId)
 }
 
-func (c CategoryService) Create(req *common.Request[category.AddCategory]) common.Response[any] {
-	categoryReq := mapper.CategoryMapper(req.Data, "Anonymous")
+func (c CategoryService) Create(req *common.Request[category.AddCategory], user string) common.Response[any] {
+	categoryReq := mapper.CategoryMapper(req.Data, user)
 
 	CategoryReq := mapper.RequestMapper(req, categoryReq)
 

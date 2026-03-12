@@ -17,11 +17,17 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	echomw "github.com/labstack/echo/v4/middleware"
 	"gorm.io/gorm"
 )
 
 func setupMiddleware(e *echo.Echo) {
-	// Order matters: Recovery first, then RequestID, then Logger
+	// Order matters: CORS first (handle preflight), then Recovery, RequestID, Logger
+	e.Use(echomw.CORSWithConfig(echomw.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.OPTIONS},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+	}))
 	e.Use(middleware.Recovery())
 	e.Use(middleware.RequestID())
 	e.Use(middleware.Logger())

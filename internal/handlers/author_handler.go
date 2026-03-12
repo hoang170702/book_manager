@@ -6,6 +6,7 @@ import (
 	"book-manager/internal/dto/common"
 	"book-manager/internal/services"
 	"book-manager/internal/utils"
+	"book-manager/internal/utils/auth"
 	"book-manager/internal/utils/enums/error_codes"
 
 	"github.com/labstack/echo/v4"
@@ -32,7 +33,8 @@ func (h *AuthorHandler) Add(c echo.Context) error {
 		return c.JSON(constants.StatusBadRequest, resp)
 	}
 
-	resp := h.Service.Create(&reqDto)
+	user := auth.GetCurrentUser(c)
+	resp := h.Service.Create(&reqDto, user)
 	return c.JSON(constants.StatusOK, resp)
 }
 
@@ -75,7 +77,8 @@ func (h *AuthorHandler) Update(c echo.Context) error {
 		return c.JSON(constants.StatusBadRequest, resp)
 	}
 
-	resp := h.Service.Update(&reqDto)
+	user := auth.GetCurrentUser(c)
+	resp := h.Service.Update(&reqDto, user)
 	return c.JSON(constants.StatusOK, resp)
 }
 
@@ -91,6 +94,7 @@ func (h *AuthorHandler) Delete(c echo.Context) error {
 		return c.JSON(constants.StatusBadRequest, resp)
 	}
 
-	resp := h.Service.Delete(&reqDto)
+	user := auth.GetCurrentUser(c)
+	resp := h.Service.Delete(&reqDto, user)
 	return c.JSON(constants.StatusOK, resp)
 }
