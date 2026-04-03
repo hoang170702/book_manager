@@ -16,5 +16,10 @@ var (
 	AuthorNotFound       = ErrorCode{"04", "Author not found"}
 	AuthorAlreadyDeleted = ErrorCode{"05", "Author already deleted"}
 
+	UserAlreadyExist  = ErrorCode{"06", "Username already exists"}
+	InvalidCredential = ErrorCode{"07", "Invalid username or password"}
+	InvalidToken      = ErrorCode{"08", "Invalid or expired token"}
+
+	Unauthorized   = ErrorCode{"401", "Unauthorized"}
 	InvalidRequest = ErrorCode{"98", "Invalid request"}
 )

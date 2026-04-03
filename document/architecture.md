@@ -3,6 +3,8 @@
 ## Tech Stack
 - **Go 1.24** + **Echo v4** (HTTP framework)
 - **GORM** + **PostgreSQL** (ORM + Database)
+- **golang-jwt/jwt/v5** (JWT authentication)
+- **bcrypt** (`golang.org/x/crypto`) (password hashing)
 - **go-playground/validator/v10** (DTO validation)
 - **UUID** (request tracing)
 - **godotenv** (.env configuration)
@@ -16,23 +18,24 @@ book-manager/
 │   ├── config/                   ← App config + DB migration
 │   ├── constants/                ← HTTP status constants
 │   ├── dto/                      ← Data Transfer Objects (độc lập với models)
-│   │   ├── auth/                 ← (reserved for auth DTOs)
+│   │   ├── auth/                 ← Register/Login/Refresh DTOs
 │   │   ├── author/               ← Author request + response DTOs
 │   │   ├── category/             ← Category request + response DTOs
 │   │   └── common/               ← Generic Request[T], Response[T], Paginate
 │   ├── handlers/                 ← HTTP handlers (Controller layer)
 │   ├── mapper/                   ← DTO → Entity mapping
-│   ├── middleware/               ← Recovery, RequestID, Logger, Validator
+│   ├── middleware/               ← Recovery, RequestID, Logger, Validator, JWTAuth
 │   ├── models/                   ← GORM entities (internal, không expose ra API)
 │   │   ├── base/                 ← AbstractStatus, AbsTimestamp (embedded)
 │   │   ├── book/                 ← Book entity
 │   │   ├── relations/            ← N-N join tables
-│   │   └── user/                 ← (reserved for user entities)
+│   │   └── user/                 ← User entity (username, hashed password)
 │   ├── repositories/             ← Data access layer (interface + impl)
 │   ├── routes/                   ← Route registration
 │   ├── services/                 ← Business logic interfaces
 │   │   └── impl/                 ← Service implementations
 │   └── utils/
+│       ├── auth/                 ← JWT generate/validate + GetCurrentUser helper
 │       ├── enums/error_codes/    ← Error code system (ErrorCode + AppError)
 │       └── logger/               ← Custom logger + GORM logger with Request ID
 └── pkg/database/                 ← DB connection (returns *gorm.DB, no globals)
@@ -54,6 +57,20 @@ DB → Repository (models.Entity) → Service (map → ResponseDTO) → Handler 
 - **Request**: Client gửi JSON → Bind vào `Request[T]` → Validate `reqDto.Data`
 - **Response**: Repository trả `models.Entity` → Service map sang `XxxResponse` DTO → client chỉ thấy `id`, `name`
 
+## Authentication Flow
+```
+POST /auth/login → AuthService → bcrypt verify → JWT GenerateToken
+                                                  → { access_token (1h), refresh_token (7d) }
+
+GET /categories  → JWTAuth Middleware → ValidateToken (type=access)
+                 → Set claims to context → Handler → Service → Repo
+
+POST /auth/refresh → Validate refresh_token (type=refresh)
+                   → Generate new { access_token, refresh_token }
+```
+- **Public routes**: `/auth/register`, `/auth/login`, `/auth/refresh`
+- **Protected routes**: Category, Author (yêu cầu `Authorization: Bearer <access_token>`)
+
 ## Dependency Injection Flow
 ```go
 main.go
@@ -71,6 +88,8 @@ main.go
 - **Generic DTO**: `Request[T]` / `Response[T]` — enterprise pattern giống `ApiResponse<T>` trong Java
 - **Response DTO Mapping**: Service map entity → response DTO, không expose DB fields ra API
 - **Interface-based DI**: Service → Repository đều qua interface, dễ mock test
+- **JWT Authentication**: Access token (1h) + Refresh token (7d), bcrypt password hashing
+- **Route Protection**: Public/Protected group split, JWT middleware chỉ chấp nhận access token
 - **DTO Validation**: `go-playground/validator` tích hợp Echo, validate `reqDto.Data` sau Bind
 - **Safe Error Handling**: Luôn dùng `errors.As()` thay vì type assertion, có fallback cho unexpected errors
 - **Custom GORM Logger**: Chỉ log slow query >200ms, kèm Request ID cho traceability

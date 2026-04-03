@@ -4,6 +4,7 @@ import (
 	"book-manager/internal/models"
 	"book-manager/internal/models/book"
 	"book-manager/internal/models/relations"
+	"book-manager/internal/models/user"
 	"log"
 
 	"gorm.io/gorm"
@@ -15,6 +16,7 @@ func RunMigrations(db *gorm.DB) {
 		&models.Category{},
 		&book.Book{},
 		&relations.BookCategory{},
+		&user.User{},
 	}
 
 	for _, m := range modelsList {
