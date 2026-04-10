@@ -15,7 +15,7 @@ book-manager/
 ├── cmd/api/main.go              ← Entry point, DI wiring, graceful shutdown
 ├── document/                    ← Changelog, architecture, fixes plan
 ├── internal/
-│   ├── config/                   ← App config + DB migration
+│   ├── config/                   ← App config (Port, JWTSecret) + DB migration
 │   ├── constants/                ← HTTP status constants
 │   ├── dto/                      ← Data Transfer Objects (độc lập với models)
 │   │   ├── auth/                 ← Register/Login/Refresh DTOs
@@ -24,7 +24,7 @@ book-manager/
 │   │   └── common/               ← Generic Request[T], Response[T], Paginate
 │   ├── handlers/                 ← HTTP handlers (Controller layer)
 │   ├── mapper/                   ← DTO → Entity mapping
-│   ├── middleware/               ← Recovery, RequestID, Logger, Validator, JWTAuth
+│   ├── middleware/               ← Recovery, RequestID, Logger, Validator, JWTAuth, RateLimit
 │   ├── models/                   ← GORM entities (internal, không expose ra API)
 │   │   ├── base/                 ← AbstractStatus, AbsTimestamp (embedded)
 │   │   ├── book/                 ← Book entity
@@ -63,25 +63,30 @@ POST /auth/login → AuthService → bcrypt verify → JWT GenerateToken
                                                   → { access_token (1h), refresh_token (7d) }
 
 GET /categories  → JWTAuth Middleware → ValidateToken (type=access)
-                 → Set claims to context → Handler → Service → Repo
+                 → Check blacklist (revoked_tokens) → Set claims → Handler
 
 POST /auth/refresh → Validate refresh_token (type=refresh)
                    → Generate new { access_token, refresh_token }
+
+POST /auth/logout  → [Protected] Extract access token from header
+                   → Blacklist access_token + refresh_token vào revoked_tokens
 ```
 - **Public routes**: `/auth/register`, `/auth/login`, `/auth/refresh`
-- **Protected routes**: Category, Author (yêu cầu `Authorization: Bearer <access_token>`)
+- **Protected routes**: Category, Author, `/auth/logout` (yêu cầu `Authorization: Bearer <access_token>`)
 
 ## Dependency Injection Flow
 ```go
 main.go
   └─ db := database.Connect()
-  └─ config.RunMigrations(db)
+  └─ config.RunMigrations(db)       // includes User table
   └─ middleware.RegisterValidator(e)
+  └─ setupMiddleware(e)             // CORS → Recovery → RequestID → Logger
   └─ routes.RegisterRoutes(e, db)
-       └─ repo := &repositories.XxxRepository{DB: db}
-       └─ service := impl.NewXxxService(repo)
-       └─ handler := handlers.NewXxxHandler(service)
-       └─ route.register(apiGroup)
+       ├─ Public group (no JWT):
+       │    └─ AuthRepo → AuthService → AuthHandler → /auth/*
+       └─ Protected group (JWTAuth middleware):
+            ├─ CategoryRepo → CategoryService → CategoryHandler → /categories/*
+            └─ AuthorRepo → AuthorService → AuthHandler → /authors/*
 ```
 
 ## Key Design Patterns
@@ -90,6 +95,7 @@ main.go
 - **Interface-based DI**: Service → Repository đều qua interface, dễ mock test
 - **JWT Authentication**: Access token (1h) + Refresh token (7d), bcrypt password hashing
 - **Route Protection**: Public/Protected group split, JWT middleware chỉ chấp nhận access token
+- **Rate Limiting**: 10 req/min per IP cho `/auth/login` và `/auth/register`, chống brute-force
 - **DTO Validation**: `go-playground/validator` tích hợp Echo, validate `reqDto.Data` sau Bind
 - **Safe Error Handling**: Luôn dùng `errors.As()` thay vì type assertion, có fallback cho unexpected errors
 - **Custom GORM Logger**: Chỉ log slow query >200ms, kèm Request ID cho traceability

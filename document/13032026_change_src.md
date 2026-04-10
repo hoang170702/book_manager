@@ -90,31 +90,36 @@ POST /book-store/api/authors/*       (protected - JWT required)
 
 ## CẦN LÀM TIẾP
 
-### 1. Test Authentication Flow
-- Register user → Login → dùng access token gọi API → Refresh token
-- Kiểm tra `created_by` / `updated_by` = username thật (không phải "Anonymous")
+### 1. Test Authentication Flow ✅ ĐÃ TEST
+- User đã test bằng curl: Register → Login → API call với token → Refresh token
+- Tất cả đều hoạt động tốt
 
-### 2. Thêm JWT_SECRET vào .env
-```env
-JWT_SECRET=your-secure-secret-key-here
-```
+### 2. Thêm JWT_SECRET vào .env ✅ ĐÃ LÀM
+- Đã thêm `JWT_SECRET=bm-s3cr3t-k3y-ch4ng3-m3-1n-pr0duct10n` vào `.env`
 
-### 3. Config struct cập nhật (tùy chọn)
-- Thêm `JWTSecret` vào `config/config.go` nếu muốn quản lý tập trung
+### 3. Config struct cập nhật ✅ ĐÃ LÀM
+- Thêm `JWTSecret string` vào `config/config.go`, đọc từ `JWT_SECRET` env var
 
-### 4. Xóa file `models/user/role.go`
-- File này hiện chỉ có TODO comment, chưa có kế hoạch dùng ngay
+### 4. Xóa file `models/user/role.go` ✅ ĐÃ LÀM
+- Đã xóa file rỗng, chưa cần thiết cho giai đoạn hiện tại
 
-### 5. Cập nhật `cmd/verification/main.go`
-- MockService cần thêm `user string` param cho Create/Update/Delete để khớp interface mới
+### 5. Cập nhật `cmd/verification/main.go` ✅ ĐÃ LÀM
+- MockService đã thêm `user string` param cho Create/Update/Delete
+- Xóa import `models` không dùng
 
-### 6. Viết Unit Tests
+### 6. Viết Unit Tests 📋 CHƯA LÀM
 - Auth Service: Register, Login (đúng/sai password), RefreshToken (đúng/sai type)
 - JWT Utility: GenerateToken, ValidateToken, expired token
 - JWT Middleware: no token, invalid token, refresh token (should reject)
 
-### 7. Rate Limiting cho Auth endpoints (tùy chọn)
-- Chống brute-force login: giới hạn số lần gọi `/auth/login` mỗi IP
+### 7. Rate Limiting cho Auth endpoints ✅ ĐÃ LÀM
+- Tạo `middleware/rate_limit.go` — in-memory sliding window, 10 req/min per IP
+- Áp dụng cho `/auth/register` và `/auth/login` trong `auth_routes.go`
+- `/auth/refresh` không rate limit vì đã yêu cầu refresh token hợp lệ
 
-### 8. Logout / Token Blacklist (tùy chọn)
-- Hiện tại chưa có cơ chế revoke token. Nếu cần, thêm bảng `revoked_tokens` trong DB
+### 8. Logout / Token Blacklist ✅ ĐÃ LÀM
+- Tạo `models/user/revoked_token.go` — lưu token đã bị vô hiệu hóa trong DB
+- Thêm `RevokeToken`/`IsTokenRevoked` vào auth repository
+- Thêm `Logout`/`IsTokenRevoked` vào auth service
+- `POST /auth/logout` là **protected route** — bắt buộc gửi access token trong header
+- JWT middleware check blacklist trước khi cho phép truy cập

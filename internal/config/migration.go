@@ -17,6 +17,7 @@ func RunMigrations(db *gorm.DB) {
 		&book.Book{},
 		&relations.BookCategory{},
 		&user.User{},
+		&user.RevokedToken{},
 	}
 
 	for _, m := range modelsList {

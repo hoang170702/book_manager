@@ -6,6 +6,7 @@ import (
 	"book-manager/internal/utils/logger"
 	"context"
 	"errors"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -50,4 +51,26 @@ func (r *AuthRepository) FindByUsername(username string, requestId string) (*use
 		return nil, error_codes.ThrowException(err, requestId)
 	}
 	return &u, nil
+}
+
+func (r *AuthRepository) RevokeToken(token string, expiresAt interface{}, requestId string) error {
+	db := r.dbCtx(requestId)
+
+	revoked := user.RevokedToken{
+		Token: token,
+	}
+
+	if t, ok := expiresAt.(time.Time); ok {
+		revoked.ExpiresAt = t
+	} else {
+		revoked.ExpiresAt = time.Now().Add(7 * 24 * time.Hour) // fallback 7 days
+	}
+
+	return db.Create(&revoked).Error
+}
+
+func (r *AuthRepository) IsTokenRevoked(token string) bool {
+	var count int64
+	r.DB.Model(&user.RevokedToken{}).Where("token = ?", token).Count(&count)
+	return count > 0
 }

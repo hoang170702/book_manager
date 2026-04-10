@@ -4,7 +4,6 @@ import (
 	"book-manager/internal/dto/category"
 	"book-manager/internal/dto/common"
 	"book-manager/internal/handlers"
-	"book-manager/internal/models"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -15,17 +14,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// MockService
+// MockService implements services.ICategoryService for testing
 type MockService struct{}
 
-func (m *MockService) Create(req *common.Request[category.AddCategory]) common.Response[any] {
+func (m *MockService) Create(req *common.Request[category.AddCategory], user string) common.Response[any] {
 	return common.Response[any]{}
 }
 func (m *MockService) GetOne(req *common.Request[category.GetOneCategory]) common.Response[category.CategoryResponse] {
 	return common.Response[category.CategoryResponse]{}
 }
 func (m *MockService) GetAll(req *common.Request[any]) common.Response[[]category.CategoryResponse] {
-	// Verify RequestId is passed to service (optional, but good)
 	if req.RequestId != "test-req-id-123" {
 		fmt.Printf("FAIL: Service received wrong RequestId: %s\n", req.RequestId)
 	}
@@ -35,10 +33,10 @@ func (m *MockService) GetAll(req *common.Request[any]) common.Response[[]categor
 		Data:         []category.CategoryResponse{},
 	}
 }
-func (m *MockService) Update(req *common.Request[category.UpdateCategory]) common.Response[any] {
+func (m *MockService) Update(req *common.Request[category.UpdateCategory], user string) common.Response[any] {
 	return common.Response[any]{}
 }
-func (m *MockService) Delete(req *common.Request[category.DeleteCategory]) common.Response[any] {
+func (m *MockService) Delete(req *common.Request[category.DeleteCategory], user string) common.Response[any] {
 	return common.Response[any]{}
 }
 

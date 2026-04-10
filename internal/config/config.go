@@ -5,11 +5,13 @@ import (
 )
 
 type Config struct {
-	Port string
+	Port      string
+	JWTSecret string
 }
 
 func LoadConfig() *Config {
 	return &Config{
-		Port: utils.GetEnv("PORT", "8080"),
+		Port:      utils.GetEnv("PORT", "8080"),
+		JWTSecret: utils.GetEnv("JWT_SECRET", "book-manager-default-secret-change-me"),
 	}
 }

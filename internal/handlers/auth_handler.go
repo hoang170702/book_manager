@@ -7,6 +7,7 @@ import (
 	"book-manager/internal/services"
 	"book-manager/internal/utils"
 	"book-manager/internal/utils/enums/error_codes"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -67,5 +68,27 @@ func (h *AuthHandler) RefreshToken(c echo.Context) error {
 	}
 
 	resp := h.Service.RefreshToken(&reqDto)
+	return c.JSON(constants.StatusOK, resp)
+}
+
+func (h *AuthHandler) Logout(c echo.Context) error {
+	var reqDto common.Request[auth.RefreshRequest]
+
+	if err := c.Bind(&reqDto); err != nil {
+		resp := utils.BuildResponse[any](nil, error_codes.InvalidRequest, "")
+		return c.JSON(constants.StatusBadRequest, resp)
+	}
+
+	// Extract access token from Authorization header
+	accessToken := ""
+	authHeader := c.Request().Header.Get("Authorization")
+	if parts := strings.SplitN(authHeader, " ", 2); len(parts) == 2 {
+		accessToken = parts[1]
+	}
+
+	// Refresh token from request body
+	refreshToken := reqDto.Data.RefreshToken
+
+	resp := h.Service.Logout(accessToken, refreshToken, reqDto.RequestId)
 	return c.JSON(constants.StatusOK, resp)
 }

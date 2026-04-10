@@ -116,6 +116,30 @@ func (s AuthService) RefreshToken(req *common.Request[auth.RefreshRequest]) comm
 	}, error_codes.Success, req.RequestId)
 }
 
+func (s AuthService) Logout(accessToken string, refreshToken string, requestId string) common.Response[any] {
+	// Blacklist access token
+	if accessToken != "" {
+		claims, err := authutil.ValidateToken(accessToken)
+		if err == nil {
+			_ = s.Repo.RevokeToken(accessToken, claims.ExpiresAt.Time, requestId)
+		}
+	}
+
+	// Blacklist refresh token
+	if refreshToken != "" {
+		claims, err := authutil.ValidateToken(refreshToken)
+		if err == nil {
+			_ = s.Repo.RevokeToken(refreshToken, claims.ExpiresAt.Time, requestId)
+		}
+	}
+
+	return utils.BuildResponse[any](nil, error_codes.Success, requestId)
+}
+
+func (s AuthService) IsTokenRevoked(token string) bool {
+	return s.Repo.IsTokenRevoked(token)
+}
+
 func NewAuthService(repo repositories.IAuthRepository) services.IAuthService {
 	return &AuthService{Repo: repo}
 }
